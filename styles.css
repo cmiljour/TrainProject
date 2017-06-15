@@ -1,0 +1,39 @@
+header {
+	margin-left:5px;
+	margin-right: 5px;
+	padding: 40px;
+	text-align: center;
+}
+
+form {
+	margin-left:5px;
+	margin-right: 5px;
+
+}
+.boxBorder {
+	border-radius: 9px;
+	border-style: solid;
+	margin-left:5px;
+	margin-right: 5px;
+}
+
+.addTrainBox {
+	margin-top: 15px;
+	padding-bottom: 10px;
+}
+.navbar {
+	background-color: blue;
+	color: white;
+}
+
+.navbarHead {
+	background-color: blue;
+	color: white;
+	margin-left:5px;
+	margin-right: 5px;
+	padding-top: 10px;
+}
+
+.table {
+	margin-top: -20px;
+}
