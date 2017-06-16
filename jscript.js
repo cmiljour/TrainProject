@@ -40,6 +40,10 @@ $("#deleteSchedules").on("click", function(){
 
 });
 
+database.ref().on('child_removed', function(oldChildSnapshot) {
+  location.reload();
+});
+
 database.ref().on("value", function (snapshot) {
 
 	if (snapshot.val() == null){
