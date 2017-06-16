@@ -41,7 +41,7 @@ $("#deleteSchedules").on("click", function(){
 });
 
 database.ref().on('child_removed', function(oldChildSnapshot) {
-  location.reload();
+  $("#trainTable").html("");
 });
 
 database.ref().on("value", function (snapshot) {
