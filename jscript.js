@@ -1,7 +1,7 @@
 
-
 var database = firebase.database();
-
+// create array to hold each firebase entry's moment timestamp
+var momentArray = [];
 
 $("#submitAddTrain").on("click", function(){
 	event.preventDefault();
@@ -9,6 +9,8 @@ $("#submitAddTrain").on("click", function(){
 	var destination = $('#destinationInput').val();
 	var trainTimeElement = $('#trainTimeInput').val();
 	var frequency = $('#frequencyInput').val();
+	var theMoment = new Date(trainTimeElement);
+	
 
 	var trainTimeToMoment = moment(trainTimeElement);
 	var untilTrainArrives = trainTimeToMoment.diff(moment(), 'minutes');
@@ -23,7 +25,7 @@ $("#submitAddTrain").on("click", function(){
 	}
 
 	else {
-		database.ref(/* location in db*/).set({
+		database.ref(/* location in db*/).push({
 	    trainName: trainName,
 	    destination: destination,
 	    trainTime: trainTimeElement,
@@ -35,27 +37,36 @@ $("#submitAddTrain").on("click", function(){
 $("#deleteSchedules").on("click", function(){
 	event.preventDefault();
 	$("#trainTable").html("");
+	//blank out firebase 
 	database.ref().set({});
+	//blank array holding moments
+	momentArray = [];
 	location.reload();
 
 });
 
 database.ref().on('child_removed', function(oldChildSnapshot) {
-  location.reload();
+	location.reload();
 });
 
-database.ref().on("value", function (snapshot) {
+database.ref().on("child_added", function (snapshot) {
 
-	if (snapshot.val() == null){
-		return;
+	var trainTime = snapshot.val().trainTime;
+	var trainTimeToMoment = moment(trainTime);
+	var untilTrainArrives = trainTimeToMoment.diff(moment(), 'minutes');
+	var row = $("<tr><td>" + snapshot.val().trainName + "</td><td>" + snapshot.val().destination + "</td><td>" + snapshot.val().frequency + "</td><td>" + snapshot.val().trainTime + "</td><td>" + untilTrainArrives + "</td></tr>");
+	$("#trainTable > tbody").append(row);
+	//add moment to array to use later to setup setinterval minutes away
+	momentArray.push(trainTime); 
+});
+// this function goes through the momentArray, comparing current time to time in index position, and updating html with results
+function trainTimeToMoment () {
+	for (var i = 0; i < momentArray.length; i++) {
+		var momentArrayElement = moment(momentArray[i]);
+		var untilTrainArrivesDiff = momentArrayElement.diff(moment(), 'minutes');
+		var updateMinAway = $("#trainTable > tbody tr").eq(i).children().eq(4) // the 4th td in the i row! 
+		$(updateMinAway).html(untilTrainArrivesDiff);
 	}
-
-	else {
-		var trainTime = snapshot.val().trainTime;
-		var trainTimeToMoment = moment(trainTime);
-		var untilTrainArrives = trainTimeToMoment.diff(moment(), 'minutes');
-	
-		var row = $("<tr><td>" + snapshot.val().trainName + "</td><td>" + snapshot.val().destination + "</td><td>" + snapshot.val().frequency + "</td><td>" + snapshot.val().trainTime + "</td><td>" + untilTrainArrives + "</td></tr>");
-		$("#trainTable > tbody").append(row);
-	 }
-});
+}
+//create timer to refresh minutes away 
+var minutesAwayUpdate = window.setInterval(trainTimeToMoment, 1000 * 60);
